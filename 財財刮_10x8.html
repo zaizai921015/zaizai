@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>財財刮 - 娃娃機刮刮卡產生器</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    select, button {
+      padding: 8px 16px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    .card {
+      display: grid;
+      gap: 0;
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+      border: 2px solid #aaa;
+      box-sizing: border-box;
+    }
+    .cell {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 0.5px solid black;
+      font-size: 12px;
+      background-color: #f9f9f9;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1>財財刮</h1>
+  <label for="cardSize">選擇格數：</label>
+  <select id="cardSize">
+    <option value="40">40格</option>
+    <option value="60">60格</option>
+    <option value="80">80格</option>
+    <option value="100">100格</option>
+    <option value="120">120格</option>
+    <option value="140">140格</option>
+    <option value="160">160格</option>
+  </select>
+  <button onclick="generateCard()">產生卡片</button>
+  <button onclick="downloadCard()">下載圖片</button>
+
+  <div id="cardContainer"></div>
+
+  <script>
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function generateCard() {
+      const size = parseInt(document.getElementById('cardSize').value);
+      const container = document.getElementById('cardContainer');
+      container.innerHTML = '';
+
+      const layoutMap = {
+        40: [8, 5],
+        60: [10, 6],
+        80: [10, 8],
+        100: [10, 10],
+        120: [12, 10],
+        140: [14, 10],
+        160: [10, 8]
+      };
+
+      const numbers = shuffle(Array.from({ length: size }, (_, i) => i + 1));
+      let index = 0;
+
+      const parts = size === 160 ? 2 : 1;
+      const partSize = size === 160 ? 80 : size;
+
+      for (let p = 0; p < parts; p++) {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const [cols, rows] = size === 160 ? layoutMap[80] : layoutMap[size];
+        card.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+
+        for (let i = 0; i < partSize; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = numbers[index++];
+          card.appendChild(cell);
+        }
+        container.appendChild(card);
+      }
+    }
+
+    function downloadCard() {
+      html2canvas(document.getElementById('cardContainer')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = '財財刮.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
